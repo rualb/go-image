@@ -6,9 +6,17 @@ import (
 	"go-image/internal/tool/toolfile"
 	"go-image/internal/tool/tooltest"
 	_ "image/jpeg"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
+func getWorkDir() string {
+	// gihub actions permission problem
+	dir := filepath.Join(os.TempDir(), "toolimage")
+	toolfile.MakeAllDirs(dir)
+	return dir
+}
 func BenchmarkResize(b *testing.B) {
 
 	var imgTest = tooltest.GetTestImage()
@@ -37,6 +45,7 @@ func BenchmarkWatermark(b *testing.B) {
 }
 func BenchmarkResizeWatermark(b *testing.B) {
 
+	wd := getWorkDir()
 	var imgTest = tooltest.GetTestImage()
 
 	for i := 0; i < b.N; i++ {
@@ -53,10 +62,11 @@ func BenchmarkResizeWatermark(b *testing.B) {
 			b.Fatal(err)
 		}
 
-		toolfile.FileWriteWithDir("/app/volume/tmp/wm.jpg", imgWM)
+		toolfile.FileWriteWithDir(wd+"/wm.jpg", imgWM)
 	}
 }
 func TestAddWatermark(t *testing.T) {
+	wd := getWorkDir()
 	var imgTest = tooltest.GetTestImage()
 
 	for _, v := range []int{400, 600} {
@@ -69,7 +79,11 @@ func TestAddWatermark(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		toolfile.FileWriteWithDir(fmt.Sprintf("/app/volume/tmp/wm-%v.jpg", v), data)
+		if len(imgTest) < len(data) {
+			t.Fatal("Resized image size morethan original")
+		}
+
+		toolfile.FileWriteWithDir(fmt.Sprintf(wd+"/wm-%v.jpg", v), data)
 	}
 
 }
