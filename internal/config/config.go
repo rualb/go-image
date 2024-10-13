@@ -246,10 +246,14 @@ type AppConfigImageBucket struct {
 }
 
 func NewImageBucket(name string) *AppConfigImageBucket {
+	volumeDir := os.Getenv("APP_VOLUME_DIR")
+	if volumeDir == "" {
+		volumeDir = "/app/volume"
+	}
 	return &AppConfigImageBucket{
 		Name:   name,
-		Source: "/app/volume/" + name,
-		Cache:  "/app/volume/" + name + "-cache",
+		Source: volumeDir + "/" + name,
+		Cache:  volumeDir + "/" + name + "-cache",
 	}
 }
 

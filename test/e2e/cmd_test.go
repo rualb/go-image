@@ -7,22 +7,31 @@ import (
 	"go-image/internal/tool/toolimage"
 	"go-image/internal/tool/tooltest"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 )
 
+func getVolumeDir() string {
+	// gihub actions permission problem
+	dir := filepath.Join(os.TempDir(), "volume")
+	return dir
+}
 func TestCmd(t *testing.T) {
 
 	img := tooltest.GetTestImage()
 
+	volumeDir := getVolumeDir()
+
+	os.Setenv("APP_VOLUME_DIR", volumeDir)
 	os.Setenv("APP_ENV", "testing")
 	os.Setenv("APP_IMAGE_BUCKET", `["test-bucket"]`)
 
-	err := toolfile.MakeAllDirs("/app/volume/test-bucket/obj-1-2") // bucket validate that dir exists
+	err := toolfile.MakeAllDirs(volumeDir + "/test-bucket/obj-1-2") // bucket validate that dir exists
 	if err != nil {
 		t.Errorf("Error : %v", err)
 	}
-	err = os.WriteFile("/app/volume/test-bucket/obj-1-2/obj-1-2-3-4", img, os.ModePerm)
+	err = os.WriteFile(volumeDir+"/test-bucket/obj-1-2/obj-1-2-3-4", img, os.ModePerm)
 	if err != nil {
 		t.Errorf("Error : %v", err)
 	}
