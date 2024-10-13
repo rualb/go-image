@@ -1,0 +1,37 @@
+# Disable all linters first and then explicitly enable the ones you want
+linters:
+  disable-all: true
+  enable:
+    - staticcheck
+    #- revive
+    - govet
+    - unconvert
+    - unused
+    - gosec
+    - gocyclo
+    - dupl
+    - misspell
+    - unparam
+    - typecheck
+    - ineffassign
+    - stylecheck
+    - gochecknoinits
+    - copyloopvar
+    - gocritic
+    - nakedret
+    - gosimple
+    - prealloc
+  fast: false
+
+issues:
+  exclude-dirs:
+    - test
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
+        - gosec
+  exclude-use-default: false
+
+run:
+  timeout: 5m

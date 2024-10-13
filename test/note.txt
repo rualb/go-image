@@ -1,0 +1,26 @@
+ 
+ 
+###unit test instruction###
+use same package name
+unit test for all functions
+no mock
+passcode (secret code) len 8 digits
+email example user@example.com
+phone example +123121234567
+instance of "var appService AppService = MustNewAppServiceTesting()" exists as singletone
+
+###external interfaces###
+// AppService all services
+// AppService all services ep
+type AppService interface {
+	Config() *config.AppConfig
+	// Logger() logger.AppLogger
+
+	UserLang(code string) i18n.UserLang
+	HasLang(code string) bool
+
+	Repository() repository.AppRepository
+
+	Image() ImageSizeService 
+}
+
