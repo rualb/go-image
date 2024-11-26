@@ -2,10 +2,10 @@ package e2e
 
 import (
 	xcmd "go-image/internal/cmd"
-	"go-image/internal/tool/toolfile"
-	"go-image/internal/tool/toolhttp"
-	"go-image/internal/tool/toolimage"
-	"go-image/internal/tool/tooltest"
+	"go-image/internal/util/utilfile"
+	"go-image/internal/util/utilhttp"
+	"go-image/internal/util/utilimage"
+	"go-image/internal/util/utiltest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -14,12 +14,12 @@ import (
 
 func getVolumeDir() string {
 	// gihub actions permission problem
-	dir := filepath.Join(os.TempDir(), "volume")
+	dir := filepath.Join(os.TempDir(), "blob")
 	return dir
 }
 func TestCmd(t *testing.T) {
 
-	img := tooltest.GetTestImage()
+	img := utiltest.GetTestImage()
 
 	volumeDir := getVolumeDir()
 
@@ -27,7 +27,7 @@ func TestCmd(t *testing.T) {
 	os.Setenv("APP_ENV", "testing")
 	os.Setenv("APP_IMAGE_BUCKET", `["test-bucket"]`)
 
-	err := toolfile.MakeAllDirs(volumeDir + "/test-bucket/obj-1-2") // bucket validate that dir exists
+	err := utilfile.MakeAllDirs(volumeDir + "/test-bucket/obj-1-2") // bucket validate that dir exists
 	if err != nil {
 		t.Errorf("Error : %v", err)
 	}
@@ -48,10 +48,10 @@ func TestCmd(t *testing.T) {
 		query  map[string]string
 		search []byte
 	}{
-		// http://localhost:32180/image/api/size/test-bucket/obj-1-2-3-4/1
-		{title: "test image size 1", url: "http://localhost:32180/image/api/size/test-bucket/obj-1-2-3-4/1", query: map[string]string{}},
-		{title: "test image size 3", url: "http://localhost:32180/image/api/size/test-bucket/obj-1-2-3-4/3", query: map[string]string{}},
-		{title: "test image size 6", url: "http://localhost:32180/image/api/size/test-bucket/obj-1-2-3-4/6", query: map[string]string{}},
+		// http://127.0.0.1:32180/image/api/size/test-bucket/obj-1-2-3-4/1
+		{title: "test image size 1", url: "http://127.0.0.1:32180/image/api/size/test-bucket/obj-1-2-3-4/1", query: map[string]string{}},
+		{title: "test image size 3", url: "http://127.0.0.1:32180/image/api/size/test-bucket/obj-1-2-3-4/3", query: map[string]string{}},
+		{title: "test image size 6", url: "http://127.0.0.1:32180/image/api/size/test-bucket/obj-1-2-3-4/6", query: map[string]string{}},
 	}
 
 	for _, itm := range urls {
@@ -59,13 +59,13 @@ func TestCmd(t *testing.T) {
 		t.Run(itm.title, func(t *testing.T) {
 
 			t.Logf("url %v", itm.url)
-			arr, err := toolhttp.GetBytes(itm.url, itm.query, nil)
+			arr, err := utilhttp.GetBytes(itm.url, itm.query, nil)
 
 			if err != nil {
 				t.Errorf("Error : %v", err)
 			}
 
-			size, _ := toolimage.Size(arr)
+			size, _ := utilimage.Size(arr)
 			if size[0] < 1 || size[0]%200 != 0 {
 				t.Errorf("Error on %v", itm.url)
 			}

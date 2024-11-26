@@ -3,47 +3,76 @@ package controller
 // Handler web req handler
 
 import (
+	"fmt"
 	"go-image/internal/config/consts"
 	"go-image/internal/service"
-	"go-image/internal/tool/toolhttp"
-	xlog "go-image/internal/tool/toollog"
-	"go-image/internal/tool/toolstring"
+	"go-image/internal/util/utilhttp"
+	xlog "go-image/internal/util/utillog"
+	"go-image/internal/util/utilstring"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
 
-type imageSizeDto struct {
-	Bucket string `param:"bucket"` // from path :bucket/:id/:size
-	ID     string `param:"id"`     // from path
-	Size   int    `param:"size"`   // from path
+type imageSizeDTO struct {
+	Input struct {
+		Bucket string `param:"bucket"` // from path :bucket/:id/:size
+		ID     string `param:"id"`     // from path
+		Name   string `param:"name"`   // from path
+	}
+	Data struct {
+		Size int
+		Ext  string
+		Name string
+	}
 }
 
-func (x imageSizeDto) validate() bool {
+func (x *imageSizeDTO) validate() (msg string) {
 
-	if len(x.Bucket) > consts.DefaultTextSize {
-		return false
+	input := &x.Input
+	data := &x.Data
+	var err error
+	{
+
+		// !!! input from user filter
+		data.Ext = filepath.Ext(input.Name)
+		if data.Ext != ".jpg" {
+			return "Ext only .jpg"
+		}
+
+		// !!! input from user filter
+		if data.Size, err = strconv.Atoi(strings.TrimSuffix(input.Name, data.Ext)); err != nil {
+			return "Name format 1.jpg"
+		}
+
+		if data.Size < 1 || data.Size > consts.ImageSizeNr {
+			return "-"
+		}
+
+		data.Name = fmt.Sprintf("%v%v", data.Size, data.Ext) // re-create
 	}
 
-	if len(x.ID) > consts.DefaultTextSize {
-		return false
+	if len(input.Bucket) > consts.DefaultTextSize {
+		return "-"
 	}
 
-	if x.Size < 1 || x.Size > consts.ImageSizeNr {
-		return false
+	if len(input.ID) > consts.DefaultTextSize {
+		return "-"
 	}
 
-	if !toolstring.IsValidID(x.Bucket) {
-		return false
+	if !utilstring.IsValidID(input.Bucket) {
+		return "-"
 	}
 
-	if !toolstring.IsValidID(x.ID) {
-		return false
+	if !utilstring.IsValidID(input.ID) {
+		return "-"
 	}
 
-	return true
+	return ""
 }
 
 // ImageSizeController controller
@@ -68,19 +97,21 @@ func NewImageSizeController(appService service.AppService, c echo.Context) *Imag
 func (x *ImageSizeController) ImageSize() error {
 
 	c := x.webCtxt
-	dto := &imageSizeDto{}
-	err := c.Bind(dto)
+	dto := &imageSizeDTO{}
+	input := &dto.Input
+	data := &dto.Data
+	err := c.Bind(input)
 	if err != nil {
 		return err
 	}
 
-	if !dto.validate() {
-		return c.JSON(http.StatusBadRequest, toolhttp.NewMessage("Validation failed"))
+	if msg := dto.validate(); msg != "" {
+		return c.JSON(http.StatusBadRequest, utilhttp.NewMessage(fmt.Sprintf("Validation failed: %v", msg)))
 	}
 
 	srv := x.appService.ImageSize()
 
-	img, err := srv.Image(dto.Bucket, dto.ID, dto.Size)
+	img, err := srv.Image(input.Bucket, input.ID, data.Size, data.Ext)
 
 	if err != nil {
 		xlog.Error("Image size error: %v", err)

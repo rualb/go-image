@@ -14,5 +14,5 @@ const (
 
 	PathTestPingAPI = "/test/api/ping"
 
-	PathImageSizeAPI = "/image/api/size/:bucket/:id/:size"
+	PathImageSizeAPI = "/image/api/size/:bucket/:id/:name" //  not work :size.:enc not correct :size:enc
 )

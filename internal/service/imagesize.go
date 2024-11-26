@@ -3,10 +3,10 @@ package service
 import (
 	"fmt"
 	"go-image/internal/config"
-	"go-image/internal/tool/toolfile"
-	"go-image/internal/tool/toolimage"
-	xlog "go-image/internal/tool/toollog"
-	"go-image/internal/tool/toolstring"
+	"go-image/internal/util/utilfile"
+	"go-image/internal/util/utilimage"
+	xlog "go-image/internal/util/utillog"
+	"go-image/internal/util/utilstring"
 	"os"
 	"path/filepath"
 	"strings"
@@ -41,7 +41,7 @@ type ImageItem struct {
 }
 
 type ImageSizeService interface {
-	Image(bucket string, id string, sizeVariant int) (img *ImageItem, err error)
+	Image(bucket string, id string, sizeVariant int, ext string) (img *ImageItem, err error)
 }
 type bucketHandler struct {
 	Name           string
@@ -65,43 +65,42 @@ func (x *bucketHandler) subDir(id string) string {
 	return strings.Join(parts, "-")
 
 }
-func (x *bucketHandler) sourceFile(id string) string {
+func (x *bucketHandler) sourceFile(id string, ext string) string {
 
 	sub := x.subDir(id)
-
-	res := filepath.Join(x.Source, sub, id)
+	res := filepath.Join(x.Source, sub, fmt.Sprintf("%v%v", id, ext))
 	return res
 }
 
-func (x *bucketHandler) cacheFile(id string, sizeVariant int) string {
+func (x *bucketHandler) cacheFile(id string, sizeVariant int, ext string) string {
 
 	sub := x.subDir(id)
-	res := filepath.Join(x.Cache, sub, fmt.Sprintf("%v#%v", id, sizeVariant))
+	res := filepath.Join(x.Cache, sub, fmt.Sprintf("%v#%v%v", id, sizeVariant, ext))
 	return res
 }
 
 func (x *bucketHandler) fileSize(path string) int64 {
 
-	return toolfile.FileSize(path)
+	return utilfile.FileSize(path)
 
 }
 
-func (x *bucketHandler) imageInSourceExists(id string) bool {
+func (x *bucketHandler) imageInSourceExists(id string, ext string) bool {
 	//
-	sourceFile := x.sourceFile(id)
-	return toolfile.FileExists(sourceFile)
+	sourceFile := x.sourceFile(id, ext)
+	return utilfile.FileExists(sourceFile)
 	//
 }
-func (x *bucketHandler) imageInCacheExists(id string, sizeVariant int) bool {
+func (x *bucketHandler) imageInCacheExists(id string, sizeVariant int, ext string) bool {
 	//
-	cacheFile := x.cacheFile(id, sizeVariant)
-	return toolfile.FileExists(cacheFile)
+	cacheFile := x.cacheFile(id, sizeVariant, ext)
+	return utilfile.FileExists(cacheFile)
 	//
 }
 
-func (x *bucketHandler) readImageFromCache(id string, sizeVariant int) *ImageItem {
+func (x *bucketHandler) readImageFromCache(id string, sizeVariant int, ext string) *ImageItem {
 
-	cacheFile := x.cacheFile(id, sizeVariant)
+	cacheFile := x.cacheFile(id, sizeVariant, ext)
 	fileSize := x.fileSize(cacheFile)
 
 	// if exists
@@ -117,7 +116,7 @@ func (x *bucketHandler) readImageFromCache(id string, sizeVariant int) *ImageIte
 
 	return nil
 }
-func (x *bucketHandler) writeImageToCache(id string, sizeVariant int) (err error) {
+func (x *bucketHandler) writeImageToCache(id string, sizeVariant int, ext string) (err error) {
 
 	// sync writing and hdd load
 	// may be multi-task
@@ -127,13 +126,13 @@ func (x *bucketHandler) writeImageToCache(id string, sizeVariant int) (err error
 
 	//
 	// re-check after lock acquired
-	if x.imageInCacheExists(id, sizeVariant) {
+	if x.imageInCacheExists(id, sizeVariant, ext) {
 		return nil
 	}
 
-	cacheFile := x.cacheFile(id, sizeVariant)
+	cacheFile := x.cacheFile(id, sizeVariant, ext)
 
-	sourceFile := x.sourceFile(id)
+	sourceFile := x.sourceFile(id, ext)
 
 	sourceFile = filepath.Clean(sourceFile)
 	data, err := os.ReadFile(sourceFile)
@@ -143,24 +142,24 @@ func (x *bucketHandler) writeImageToCache(id string, sizeVariant int) (err error
 
 	width := sizeVariant * x.SizeStep
 	//
-	data, err = toolimage.Resize(data, width, x.Quality)
+	data, err = utilimage.Resize(data, width, x.Quality)
 	if err != nil {
 		return err
 	}
 
 	if width > x.WatermarkAfter {
-		data, err = toolimage.Watermark(data, x.Watermark, x.Quality)
+		data, err = utilimage.Watermark(data, x.Watermark, x.Quality)
 		if err != nil {
 			return err
 		}
 	}
 
 	//
-	err = toolfile.MakeAllDirs(filepath.Dir(cacheFile))
+	err = utilfile.MakeAllDirs(filepath.Dir(cacheFile))
 	if err != nil {
 		return err
 	}
-	err = toolfile.FileWrite(cacheFile, data)
+	err = utilfile.FileWrite(cacheFile, data)
 	if err != nil {
 		return err
 	}
@@ -168,14 +167,18 @@ func (x *bucketHandler) writeImageToCache(id string, sizeVariant int) (err error
 	return nil
 }
 
-func (x *bucketHandler) image(id string, sizeVariant int) (img *ImageItem, err error) {
+func (x *bucketHandler) image(id string, sizeVariant int, ext string) (img *ImageItem, err error) {
 
 	if sizeVariant < 1 || sizeVariant > x.SizeCount {
 		return nil, nil
 	}
-
 	{
-		if !toolstring.IsValidID(id) {
+		if ext != ".jpg" {
+			return nil, fmt.Errorf("error ext not valid")
+		}
+	}
+	{
+		if !utilstring.IsValidID(id) {
 			return nil, fmt.Errorf("error image id not valid")
 		}
 		id = filepath.Clean(id) //
@@ -183,7 +186,7 @@ func (x *bucketHandler) image(id string, sizeVariant int) (img *ImageItem, err e
 
 	{
 		// read
-		res := x.readImageFromCache(id, sizeVariant)
+		res := x.readImageFromCache(id, sizeVariant, ext)
 		if res != nil {
 			return res, nil
 		}
@@ -191,14 +194,14 @@ func (x *bucketHandler) image(id string, sizeVariant int) (img *ImageItem, err e
 
 	{
 		// continue if image exists
-		if !x.imageInSourceExists(id) {
+		if !x.imageInSourceExists(id, ext) {
 			return nil, nil
 		}
 	}
 
 	{
 		// create
-		err = x.writeImageToCache(id, sizeVariant)
+		err = x.writeImageToCache(id, sizeVariant, ext)
 		if err != nil {
 			return nil, err
 		}
@@ -206,7 +209,7 @@ func (x *bucketHandler) image(id string, sizeVariant int) (img *ImageItem, err e
 
 	{
 		// read
-		res := x.readImageFromCache(id, sizeVariant)
+		res := x.readImageFromCache(id, sizeVariant, ext)
 		if res != nil {
 			return res, nil
 		}
@@ -222,14 +225,14 @@ type defaultImageSizeSrv struct {
 	bucketHandlers map[string]*bucketHandler
 }
 
-func (x *defaultImageSizeSrv) Image(bucket string, id string, sizeVariant int) (img *ImageItem, err error) {
+func (x *defaultImageSizeSrv) Image(bucket string, id string, sizeVariant int, ext string) (img *ImageItem, err error) {
 
 	h := x.bucketHandlers[bucket]
 	if h == nil {
 		return nil, fmt.Errorf("error no bucket: %v", bucket)
 	}
 
-	return h.image(id, sizeVariant)
+	return h.image(id, sizeVariant, ext)
 
 }
 
@@ -264,15 +267,17 @@ func MustNewImageSizeService(appConfig *config.AppConfig) ImageSizeService {
 			h.SizeStep = defaultImageSizeStep
 		}
 
-		if !toolfile.DirExists(h.Source) {
-			err := toolfile.MakeAllDirs(h.Source)
+		if !utilfile.DirExists(h.Source) {
+			xlog.Warn("Image source dir no exists %v", h.Source)
+			err := utilfile.MakeAllDirs(h.Source)
 			if err != nil {
 				xlog.Panic("Create bucket %v source:  %v", h.Name, err)
 			}
 		}
 
-		if !toolfile.DirExists(h.Cache) {
-			err := toolfile.MakeAllDirs(h.Cache)
+		if !utilfile.DirExists(h.Cache) {
+			xlog.Warn("Image cache dir no exists %v", h.Cache)
+			err := utilfile.MakeAllDirs(h.Cache)
 			if err != nil {
 				xlog.Panic("Create bucket %v cache:  %v", h.Name, err)
 			}

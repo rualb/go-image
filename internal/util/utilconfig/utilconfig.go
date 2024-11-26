@@ -1,11 +1,11 @@
-// Package toolconfig ...
-package toolconfig
+// Package utilconfig ...
+package utilconfig
 
 import (
 	"encoding/json"
 	"fmt"
-	"go-image/internal/tool/toolhttp"
-	xlog "go-image/internal/tool/toollog"
+	"go-image/internal/util/utilhttp"
+	xlog "go-image/internal/util/utillog"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func LoadConfig(cnfPtr any, dir string, fileName string) error {
+func LoadConfig(cfgPtr any, dir string, fileName string) error {
 
 	xlog.Info("Loading config from: %v", dir)
 
@@ -23,13 +23,13 @@ func LoadConfig(cnfPtr any, dir string, fileName string) error {
 
 	if isHTTP {
 
-		err := fromURL(cnfPtr, dir, fileName)
+		err := fromURL(cfgPtr, dir, fileName)
 		if err != nil {
 			return err
 		}
 
 	} else {
-		err := fromFile(cnfPtr, dir, fileName)
+		err := fromFile(cfgPtr, dir, fileName)
 		if err != nil {
 			return err
 		}
@@ -39,7 +39,7 @@ func LoadConfig(cnfPtr any, dir string, fileName string) error {
 }
 
 // FromFile errIfNotExists argument soft binding, no error if file not exists
-func fromFile(cnfPtr any, dir string, file string) error {
+func fromFile(cfgPtr any, dir string, file string) error {
 
 	if file == "" {
 		return nil
@@ -65,7 +65,7 @@ func fromFile(cnfPtr any, dir string, file string) error {
 
 	xlog.Info("Loading config from file: %v", fullPath)
 
-	err = fromJSON(cnfPtr, string(data))
+	err = fromJSON(cfgPtr, string(data))
 
 	if err != nil {
 		return err
@@ -75,7 +75,7 @@ func fromFile(cnfPtr any, dir string, file string) error {
 }
 
 // FromURL errIfNotExists argument soft binding, no error if file not exists
-func fromURL(cnfPtr any, dir string, file string) error {
+func fromURL(cfgPtr any, dir string, file string) error {
 
 	if file == "" {
 		return nil
@@ -94,7 +94,7 @@ func fromURL(cnfPtr any, dir string, file string) error {
 
 	// fmt.Println("Reading config from file: ", file)
 
-	data, err := toolhttp.GetBytes(fullPath, nil, nil)
+	data, err := utilhttp.GetBytes(fullPath, nil, nil)
 
 	if err != nil {
 		return fmt.Errorf("error with file %v: %v", fullPath, err)
@@ -102,7 +102,7 @@ func fromURL(cnfPtr any, dir string, file string) error {
 
 	xlog.Info("Loading config from file: %v", fullPath)
 
-	err = fromJSON(cnfPtr, string(data))
+	err = fromJSON(cfgPtr, string(data))
 	if err != nil {
 		return err
 	}
@@ -144,7 +144,7 @@ func expandEnv(data string) string {
 
 }
 
-func fromJSON(cnfPtr any, data string) error {
+func fromJSON(cfgPtr any, data string) error {
 
 	if data == "" {
 		return nil
@@ -152,7 +152,7 @@ func fromJSON(cnfPtr any, data string) error {
 
 	data = expandEnv(data)
 
-	err := json.Unmarshal([]byte(data), cnfPtr)
+	err := json.Unmarshal([]byte(data), cfgPtr)
 
 	if err != nil {
 		return err

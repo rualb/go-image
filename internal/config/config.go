@@ -6,9 +6,9 @@ import (
 	"flag"
 	"fmt"
 	"go-image/internal/config/consts"
-	"go-image/internal/tool/toolconfig"
-	"go-image/internal/tool/toolhttp"
-	xlog "go-image/internal/tool/toollog"
+	"go-image/internal/util/utilconfig"
+	"go-image/internal/util/utilhttp"
+	xlog "go-image/internal/util/utillog"
 	"math"
 	"net/url"
 	"os"
@@ -248,7 +248,7 @@ type AppConfigImageBucket struct {
 func NewImageBucket(name string) *AppConfigImageBucket {
 	volumeDir := os.Getenv("APP_VOLUME_DIR")
 	if volumeDir == "" {
-		volumeDir = "/app/volume"
+		volumeDir = "/app/blob"
 	}
 	return &AppConfigImageBucket{
 		Name:   name,
@@ -361,8 +361,8 @@ func NewAppConfig() *AppConfig {
 			RateLimit: 0,
 			RateBurst: 0,
 
-			Listen: "localhost:32180",
-			//ListenTLS: "localhost:32183",
+			Listen: "127.0.0.1:32180",
+			//ListenTLS: "127.0.0.1:32183",
 			CertDir: "",
 
 			SysAPIKey: "",
@@ -578,7 +578,7 @@ func (x *AppConfigSource) Load() error {
 
 			xlog.Info("Loading config from: %v", dir)
 
-			err := toolconfig.LoadConfig(res /*pointer*/, dir, fileName)
+			err := utilconfig.LoadConfig(res /*pointer*/, dir, fileName)
 
 			if err != nil {
 				return err
@@ -692,7 +692,7 @@ func (x *AppConfig) FromURL(dir string, file string) error {
 
 	// fmt.Println("Reading config from file: ", file)
 
-	data, err := toolhttp.GetBytes(fullPath, nil, nil)
+	data, err := utilhttp.GetBytes(fullPath, nil, nil)
 
 	if err != nil {
 		return fmt.Errorf("error with file %v: %v", fullPath, err)

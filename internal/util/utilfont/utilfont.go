@@ -1,5 +1,5 @@
-// Package toolfont ...
-package toolfont
+// Package utilfont ...
+package utilfont
 
 import _ "embed"
 

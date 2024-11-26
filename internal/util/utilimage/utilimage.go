@@ -1,11 +1,11 @@
-// Package toolimage ...
-package toolimage
+// Package utilimage ...
+package utilimage
 
 import (
 	"bytes"
 	_ "embed"
 	"fmt"
-	"go-image/internal/tool/toolfont"
+	"go-image/internal/util/utilfont"
 	"image"
 	"image/color"
 	"image/jpeg"
@@ -128,7 +128,7 @@ func Watermark(data []byte, text string, quality int) ([]byte, error) {
 
 func addWatermarkCenter(imgOld image.Image, text string) (image.Image, error) {
 
-	// Parse the TTF font from byte slice (toolfont.FontRobotoBoldTtf)
+	// Parse the TTF font from byte slice (utilfont.FontRobotoBoldTtf)
 	fnt, err := getFontWatermark()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get font: %v", err)
@@ -199,7 +199,7 @@ func getFontWatermark() (*opentype.Font, error) {
 	// Check again inside the locked section
 	if cachedFontWatermark == nil {
 		var err error
-		cachedFontWatermark, err = opentype.Parse(toolfont.FontRobotoRegularTtf)
+		cachedFontWatermark, err = opentype.Parse(utilfont.FontRobotoRegularTtf)
 		if err != nil {
 			return nil, err
 		}

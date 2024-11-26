@@ -1,5 +1,5 @@
-// Package toolstring string tool
-package toolstring
+// Package utilstring string tool
+package utilstring
 
 import (
 	"net/url"

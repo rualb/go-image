@@ -1,5 +1,5 @@
-// Package toolhttp http tool
-package toolhttp
+// Package utilhttp http tool
+package utilhttp
 
 import (
 	"bytes"

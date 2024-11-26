@@ -4,7 +4,7 @@ package i18n
 import (
 	"fmt"
 	"go-image/internal/config"
-	"go-image/internal/tool/toolconfig"
+	"go-image/internal/util/utilconfig"
 	"maps"
 	"slices"
 	"strings"
@@ -19,7 +19,7 @@ type TextLang interface {
 type UserLang interface {
 	Lang(text string, args ...any) string
 	LangCode() string
-	LangData() map[string]string
+	LangWords() map[string]string
 }
 
 // AppLang all langs
@@ -97,7 +97,7 @@ func (x *appLang) loadFromConfigFiles(configPath []string, langs []string) {
 
 			var fileData map[string]string
 
-			err := toolconfig.LoadConfig(&fileData, dir, fileName)
+			err := utilconfig.LoadConfig(&fileData, dir, fileName)
 			if err != nil {
 				panic(fmt.Errorf("error reading file: %v", err))
 			}
@@ -136,7 +136,7 @@ func (x *userLang) LangCode() string {
 
 	return x.code
 }
-func (x *userLang) LangData() map[string]string {
+func (x *userLang) LangWords() map[string]string {
 
 	return x.data
 }

@@ -1,6 +1,6 @@
-// Package toolstring string tool
+// Package utilstring string tool
 
-package toolstring
+package utilstring
 
 import "testing"
 

@@ -1,5 +1,5 @@
-// Package toollog ...
-package toollog
+// Package utillog ...
+package utillog
 
 import (
 	"fmt"

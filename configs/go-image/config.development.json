@@ -3,8 +3,8 @@
 	"image_buckets": [
 		 { 
 			"name":"shop",
-			"source": "/app/volume/test-image",
-			"cache": "/app/volume/test-image-cache" 
+			"source": "/app/blob/test-image",
+			"cache": "/app/blob/test-image-cache" 
 		}  
 	] 
 }

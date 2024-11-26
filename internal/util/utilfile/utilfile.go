@@ -1,5 +1,5 @@
-// Package toolfile ...
-package toolfile
+// Package utilfile ...
+package utilfile
 
 import (
 	"os"
