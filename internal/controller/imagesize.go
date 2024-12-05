@@ -56,11 +56,11 @@ func (x *imageSizeDTO) validate() (msg string) {
 		data.Name = fmt.Sprintf("%v%v", data.Size, data.Ext) // re-create
 	}
 
-	if len(input.Bucket) > consts.DefaultTextSize {
+	if len(input.Bucket) > consts.DefaultTextLength {
 		return "-"
 	}
 
-	if len(input.ID) > consts.DefaultTextSize {
+	if len(input.ID) > consts.DefaultTextLength {
 		return "-"
 	}
 

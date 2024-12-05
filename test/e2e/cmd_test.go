@@ -31,7 +31,7 @@ func TestCmd(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error : %v", err)
 	}
-	err = os.WriteFile(volumeDir+"/test-bucket/obj-1-2/obj-1-2-3-4", img, os.ModePerm)
+	err = os.WriteFile(volumeDir+"/test-bucket/obj-1-2/obj-1-2-3-4.jpg", img, os.ModePerm)
 	if err != nil {
 		t.Errorf("Error : %v", err)
 	}
@@ -48,10 +48,11 @@ func TestCmd(t *testing.T) {
 		query  map[string]string
 		search []byte
 	}{
-		// http://127.0.0.1:32180/image/api/size/test-bucket/obj-1-2-3-4/1
-		{title: "test image size 1", url: "http://127.0.0.1:32180/image/api/size/test-bucket/obj-1-2-3-4/1", query: map[string]string{}},
-		{title: "test image size 3", url: "http://127.0.0.1:32180/image/api/size/test-bucket/obj-1-2-3-4/3", query: map[string]string{}},
-		{title: "test image size 6", url: "http://127.0.0.1:32180/image/api/size/test-bucket/obj-1-2-3-4/6", query: map[string]string{}},
+		// http://127.0.0.1:32180/image/api/size/test-bucket/obj-1-2-3-4/1  /image/api/size/:bucket/:id/:name
+
+		{title: "test image size 1", url: "http://127.0.0.1:32180/image/api/size/test-bucket/obj-1-2-3-4/1.jpg", query: map[string]string{}},
+		{title: "test image size 3", url: "http://127.0.0.1:32180/image/api/size/test-bucket/obj-1-2-3-4/3.jpg", query: map[string]string{}},
+		{title: "test image size 6", url: "http://127.0.0.1:32180/image/api/size/test-bucket/obj-1-2-3-4/6.jpg", query: map[string]string{}},
 	}
 
 	for _, itm := range urls {
