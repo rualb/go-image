@@ -51,13 +51,6 @@ func MustNewRepository(config *config.AppConfig,
 // logger loggerX.AppLogger
 ) AppRepository {
 
-	// if !config.Db.Enabled {
-
-	// 	logger.ZapLogger().Warn("Repository not enabled")
-
-	// 	return nil
-	// }
-
 	db, err := connectDatabase(&config.DB) // logger
 
 	if err != nil {
