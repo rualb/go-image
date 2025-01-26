@@ -68,14 +68,14 @@ func (x *bucketHandler) subDir(id string) string {
 func (x *bucketHandler) sourceFile(id string, ext string) string {
 
 	sub := x.subDir(id)
-	res := filepath.Join(x.Source, sub, fmt.Sprintf("%v%v", id, ext))
+	res := filepath.Join(x.Source, sub, fmt.Sprintf("%s%s", id, ext))
 	return res
 }
 
 func (x *bucketHandler) cacheFile(id string, sizeVariant int, ext string) string {
 
 	sub := x.subDir(id)
-	res := filepath.Join(x.Cache, sub, fmt.Sprintf("%v#%v%v", id, sizeVariant, ext))
+	res := filepath.Join(x.Cache, sub, fmt.Sprintf("%s#%d%s", id, sizeVariant, ext))
 	return res
 }
 
@@ -110,7 +110,7 @@ func (x *bucketHandler) readImageFromCache(id string, sizeVariant int, ext strin
 		res.File = cacheFile
 		res.Size = fileSize
 		res.Mime = "image/jpeg"
-		res.Name = fmt.Sprintf("%v.jpg", sizeVariant)
+		res.Name = fmt.Sprintf("%d.jpg", sizeVariant)
 		return res
 	}
 
@@ -229,7 +229,7 @@ func (x *defaultImageSizeSrv) Image(bucket string, id string, sizeVariant int, e
 
 	h := x.bucketHandlers[bucket]
 	if h == nil {
-		return nil, fmt.Errorf("error no bucket: %v", bucket)
+		return nil, fmt.Errorf("error no bucket: %s", bucket)
 	}
 
 	return h.image(id, sizeVariant, ext)
@@ -268,22 +268,22 @@ func MustNewImageSizeService(appConfig *config.AppConfig) ImageSizeService {
 		}
 
 		if !utilfile.DirExists(h.Source) {
-			xlog.Warn("Image source dir no exists %v", h.Source)
+			xlog.Warn("image source dir no exists %s", h.Source)
 			err := utilfile.MakeAllDirs(h.Source)
 			if err != nil {
-				xlog.Panic("Create bucket %v source:  %v", h.Name, err)
+				xlog.Panic("create bucket %v source:  %v", h.Name, err)
 			}
 		}
 
 		if !utilfile.DirExists(h.Cache) {
-			xlog.Warn("Image cache dir no exists %v", h.Cache)
+			xlog.Warn("image cache dir no exists %s", h.Cache)
 			err := utilfile.MakeAllDirs(h.Cache)
 			if err != nil {
-				xlog.Panic("Create bucket %v cache:  %v", h.Name, err)
+				xlog.Panic("create bucket %v cache:  %v", h.Name, err)
 			}
 		}
 
-		xlog.Info("Image bucket: %v", *h)
+		xlog.Info("image bucket: %v", *h)
 
 		imageBuckets[v.Name] = h
 	}

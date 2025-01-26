@@ -56,7 +56,7 @@ type appLang struct {
 	defaultLang string
 	langs       []string                     // lang codes [en,es]
 	names       []string                     // lang names [English,Spanish]
-	data        map[string]map[string]string // words map {en{"Sing in":"Login"},es{"Sing in":"Iniciar sesión"}}
+	data        map[string]map[string]string // words map {en{"Sign in":"Login"},es{"Sign in":"Iniciar sesión"}}
 }
 type userLang struct {
 	code string
@@ -110,7 +110,7 @@ func (x *appLang) loadFromConfigFiles(configPath []string, langs []string) {
 	maps.Copy(x.data, result)
 }
 
-// Lang translate en-to-es Lang("Hello, {0}","Jon") to "Hola, Jon"
+// Lang translate en-to-es Lang(`Hello, {0}`,`Jon`) to `Hola, Jon`
 func (x *userLang) Lang(text string, args ...any) string {
 
 	if x.data != nil {

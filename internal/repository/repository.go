@@ -22,7 +22,7 @@ type AppRepository interface {
 	First(out interface{}, where ...interface{}) *gorm.DB
 	Raw(sql string, values ...interface{}) *gorm.DB
 	Create(value interface{}) *gorm.DB
-	// gorm insert or update all fileds
+	// gorm insert or update all fields
 	Save(value interface{}) *gorm.DB
 	// gorm update non-zero fields by default
 	Updates(value interface{}) *gorm.DB
@@ -101,7 +101,7 @@ func connectDatabase(
 		// 	//SingularTable: true, //not *s as table suffix // use singular table name, table for `User` would be `user` with this option enabled
 		// 	//NoLowerCase:   true, //as-is // skip the snake_casing of names
 		// },
-		//Logger: loggerGorm.Default.LogMode(logger_gorm.Info),
+		// Logger: loggerGorm.Default.LogMode(logger_gorm.Info),
 	}
 
 	if config.Dialect == POSTGRES {

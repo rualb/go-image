@@ -106,7 +106,7 @@ func (x *ImageSizeController) ImageSize() error {
 	}
 
 	if msg := dto.validate(); msg != "" {
-		return c.JSON(http.StatusBadRequest, utilhttp.NewMessage(fmt.Sprintf("Validation failed: %v", msg)))
+		return c.JSON(http.StatusBadRequest, utilhttp.NewMessage(fmt.Sprintf("validation failed: %v", msg)))
 	}
 
 	srv := x.appService.ImageSize()
@@ -114,7 +114,7 @@ func (x *ImageSizeController) ImageSize() error {
 	img, err := srv.Image(input.Bucket, input.ID, data.Size, data.Ext)
 
 	if err != nil {
-		xlog.Error("Image size error: %v", err)
+		xlog.Error("image size error: %v", err)
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
@@ -132,7 +132,7 @@ func (x *ImageSizeController) ImageSize() error {
 			c.Response().Header().Set(echo.HeaderContentLength, strconv.FormatInt(img.Size, 10))
 		}
 
-		c.Response().Header().Set("Cache-Control", "public,max-age=31536000,immutable")
+		c.Response().Header().Set(`Cache-Control`, "public,max-age=31536000,immutable")
 
 		if len(img.Data) > 0 {
 			return c.Blob(http.StatusOK, img.Mime, img.Data)
@@ -141,7 +141,7 @@ func (x *ImageSizeController) ImageSize() error {
 		if len(img.File) > 0 {
 			stream, err := os.Open(img.File)
 			if err != nil {
-				xlog.Error("File open error: %v", img.File)
+				xlog.Error("file open error: %v", img.File)
 				return c.NoContent(http.StatusInternalServerError)
 			}
 			defer stream.Close()

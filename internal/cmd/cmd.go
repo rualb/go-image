@@ -46,9 +46,9 @@ func (x *Command) Exec() {
 	router.Init(x.WebDriver, x.AppService)     // 2
 
 	defer func() {
-		xlog.Info("Closing repository")
+		xlog.Info("closing repository")
 		_ = x.AppService.Repository().Close()
-		xlog.Info("Bye")
+		xlog.Info("bye")
 	}()
 
 	x.startWithGracefulShutdown()
@@ -82,12 +82,12 @@ func (x *Command) startWithGracefulShutdown() {
 		applyServer(webDriver.Server, appConfig)
 		applyServer(webDriver.TLSServer, appConfig)
 
-		xlog.Info("Server starting: %v", listen)
+		xlog.Info("server starting: %v", listen)
 
 		go func() {
 
 			defer func() {
-				xlog.Info("Server exiting")
+				xlog.Info("server exiting")
 
 				if r := recover(); r != nil {
 					// Log or handle the panic
@@ -109,11 +109,11 @@ func (x *Command) startWithGracefulShutdown() {
 
 	// Wait for interrupt signal to gracefully shutdown the server with a timeout of 10 seconds.
 	<-ctx.Done()
-	xlog.Info("Interrupt signal")
+	xlog.Info("interrupt signal")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	xlog.Info("Shutdown web driver")
+	xlog.Info("shutdown web driver")
 	if err := webDriver.Shutdown(ctx); err != nil {
-		xlog.Error("Error on shutdown server: %v", err)
+		xlog.Error("error on shutdown server: %v", err)
 	}
 }
