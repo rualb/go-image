@@ -57,7 +57,9 @@ func (x *defaultAppService) mustBuild() {
 
 	x.imageSize = MustNewImageSizeService(appConfig)
 
-	mustCreateRepository(x)
+	if appConfig.DB.Migration {
+		mustCreateRepository(x) //
+	}
 }
 
 func mustConfigRuntime(appConfig *config.AppConfig) {

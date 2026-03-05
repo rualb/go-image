@@ -132,7 +132,7 @@ func (x *ImageSizeController) ImageSize() error {
 			c.Response().Header().Set(echo.HeaderContentLength, strconv.FormatInt(img.Size, 10))
 		}
 
-		c.Response().Header().Set(`Cache-Control`, "public,max-age=31536000,immutable")
+		c.Response().Header().Set(`Cache-Control`, "public,max-age=2592000,immutable")
 
 		if len(img.Data) > 0 {
 			return c.Blob(http.StatusOK, img.Mime, img.Data)
