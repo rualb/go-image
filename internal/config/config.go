@@ -394,8 +394,8 @@ func NewAppConfig() *AppConfig {
 			RateLimit: 0,
 			RateBurst: 0,
 
-			Listen: "127.0.0.1:32180",
-			// ListenTLS: "127.0.0.1:32183",
+			Listen: ":32180",
+			// ListenTLS: ":32183",
 			CertDir: "",
 
 			SysAPIKey: "",
