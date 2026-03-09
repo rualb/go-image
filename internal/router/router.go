@@ -104,8 +104,13 @@ func initSys(e *echo.Echo, appService service.AppService) {
 
 func initDebugController(e *echo.Echo, _ service.AppService) {
 	e.GET(consts.PathImagePingDebugAPI, func(c echo.Context) error { return c.String(http.StatusOK, "pong") })
-	// publicly-available-no-sensitive-data
-	e.GET("/health", func(c echo.Context) error { return c.JSON(http.StatusOK, struct{}{}) })
+	//
+	// status
+	e.GET("/-/health", func(c echo.Context) error { return c.JSON(http.StatusOK, struct{}{}) })
+	//
+	e.GET("/-/probe/startup", func(c echo.Context) error { return c.String(http.StatusOK, "ok") })
+	e.GET("/-/probe/ready", func(c echo.Context) error { return c.String(http.StatusOK, "ok") })
+	e.GET("/-/probe/live", func(c echo.Context) error { return c.String(http.StatusOK, "ok") })
 
 }
 func initImageSizeController(e *echo.Echo, appService service.AppService) {
